@@ -22,10 +22,17 @@ CREATE TABLE user_roles (
 
 CREATE TABLE businesses (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- mapping table linking businesses to users (owners/managers)
+CREATE TABLE business_users (
+    business_id INT NOT NULL,
+    user_id INT NOT NULL,
+    PRIMARY KEY (business_id, user_id),
+    FOREIGN KEY (business_id) REFERENCES businesses(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -38,6 +45,8 @@ CREATE TABLE locations (
     state VARCHAR(100),
     postcode VARCHAR(20),
     phone VARCHAR(50),
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (business_id) REFERENCES businesses(id)
 );
@@ -48,6 +57,7 @@ CREATE TABLE deals (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(8,2),
+    day_of_week VARCHAR(20),
     start_time TIME,
     end_time TIME,
     start_date DATE,
