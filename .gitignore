@@ -1,0 +1,22 @@
+# Ignore composer dependencies
+vendor/
+
+# Ignore environment files
+.env
+
+# Ignore OS / Editor files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE config
+.idea/
+.vscode/
+
+# Ignore node modules (if using any)
+node_modules/
+
+# Ignore application logs
+*.log
+
+# Ignore database data volume
+db-data/
