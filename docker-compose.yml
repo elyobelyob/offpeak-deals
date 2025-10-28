@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  web:
+    build: ./php
+    container_name: offpeak-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./php:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_USER=appuser
+      - DB_PASS=secretpass
+      - DB_NAME=offpeak
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.2
+    container_name: offpeak-db
+    restart: always
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: offpeak
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: secretpass
+    ports:
+      - "3306:3306"
+
+  # phpMyAdmin service (optional)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - db
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: appuser
+      PMA_PASSWORD: secretpass
