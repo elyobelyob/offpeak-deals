@@ -50,6 +50,32 @@ This repository contains a PHP-based platform that allows businesses to publish 
 - Visit `http://localhost:8080/php/public/` to access the consumer-facing site and search for deals.
 - Use the `business` and `admin` portals to manage businesses, locations and deals. Users must be logged in with appropriate roles to access these pages.
 
+## Geocoding
+
+This project now includes support for storing latitude and longitude for address records and tooling to resolve addresses into coordinates (geocoding). The implementation is available in the companion pull request: https://github.com/elyobelyob/offpeak-deals/pull/2 — review that PR for the code changes and scripts.
+
+What changed
+- Database: an additional migration (`migrations/001_add_lat_long.sql`) adds `latitude` and `longitude` columns to the addresses table.
+- Geocoding providers: the implementation supports Nominatim (OpenStreetMap) as the default provider (no API key required) and optional Google Maps Geocoding (requires an API key).
+- Utilities: the PR contains a lightweight geocoding utility, a rate-limited bulk geocoding script, and an example endpoint to geocode individual addresses.
+
+Environment variables used by the geocoding tooling
+- GEOCODER_PROVIDER — "nominatim" (default) or "google".
+- GOOGLE_GEOCODE_API_KEY — required if GEOCODER_PROVIDER=google.
+- NOMINATIM_THROTTLE_MS — throttle delay in milliseconds for bulk operations (default ≈ 1100 ms to be polite to Nominatim).
+- GEOCODER_USER_AGENT — user agent string sent to Nominatim; set to identify your application.
+- DATABASE_URL — a connection string used by the provided tooling (if running the Node scripts locally). Adjust as needed for your environment.
+
+How to use the tools (overview)
+- Migration: run the `migrations/001_add_lat_long.sql` migration as shown above to add `latitude` and `longitude` columns.
+- Manual geocode (single address): the PR includes an example route that accepts an address and persists latitude/longitude. See the PR for the exact endpoint and usage.
+- Bulk geocoding: a bulk script is provided which iterates over address records without coordinates, geocodes them with the configured provider, and updates the database. The script includes a dry-run mode and respects the NOMINATIM_THROTTLE_MS setting. See the PR for the exact script path and options.
+
+Notes and recommendations
+- Nominatim usage policy requires being polite with request rates and identifying your application via User-Agent. Use NOMINATIM_THROTTLE_MS ≈ 1100 ms for bulk operations.
+- For production, consider implementing geocoding in a background job worker and using a shared cache (e.g., Redis) to reduce duplicate requests and avoid blocking web requests.
+- If you prefer an all-PHP solution (no Node tooling), you can implement geocoding calls from PHP (for example using Guzzle) and update the MySQL rows directly. The migration and schema changes remain the same.
+
 ## Contributing
 
 Contributions are welcome! This project follows an open-source model under the AGPL 3.0 licence. Feel free to fork the repo, submit pull requests or open issues. For database changes, please add a new migration file under `migrations/` rather than editing the existing schema directly.
